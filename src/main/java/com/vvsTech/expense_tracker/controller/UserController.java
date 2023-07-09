@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/expenseTracker")
@@ -42,4 +43,15 @@ public class UserController {
         return genericResponse;
     }
 
+    @GetMapping("/testApiRedis")
+    public GenericResponse<Map<String, Object>> testApiRedis(@RequestParam String name){
+        Map<String, Object> map = userService.testApiRedis(name);
+        GenericResponse genericResponse = GenericResponse.builder()
+                .data(map)
+                .statusCode(HttpStatus.OK.value())
+                .code(0)
+                .message("here's your hashmap")
+                .build();
+        return genericResponse;
+    }
 }

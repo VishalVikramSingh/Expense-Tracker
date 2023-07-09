@@ -1,5 +1,6 @@
 package com.vvsTech.expense_tracker.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vvsTech.expense_tracker.model.User;
 import com.vvsTech.expense_tracker.model.UserStatus;
 import com.vvsTech.expense_tracker.repository.UserRepository;
@@ -8,6 +9,8 @@ import com.vvsTech.expense_tracker.response.CreateUserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -18,6 +21,8 @@ public class UserService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public CreateUserResponse addUser(CreateUserRequest createUserRequest){
 
@@ -27,7 +32,7 @@ public class UserService {
             User user = createUserRequest.toUser();
             user.setUserStatus(UserStatus.ACTIVE);
             userFromDB = userRepository.save(user);
-            redisTemplate.opsForValue().set(userFromDB.getEmail(),userFromDB);
+            storeToRedis(userFromDB);
             createUserResponse = CreateUserResponse.builder().message("User Added").userId(userFromDB.getId()).build();
         }
         else{
@@ -45,8 +50,17 @@ public class UserService {
         }
         else{
             User userFromDB = userRepository.findByEmail(email);
+            storeToRedis(userFromDB);
             return userFromDB;
         }
     }
 
+    private void storeToRedis(User user){
+        redisTemplate.opsForValue().set(user.getEmail(),user);
+        redisTemplate.opsForHash().putAll(user.getName(), objectMapper.convertValue(user, Map.class));
+    }
+
+    public Map<String, Object> testApiRedis(String name) {
+        return redisTemplate.opsForHash().entries(name);
+    }
 }
