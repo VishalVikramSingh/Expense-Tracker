@@ -7,10 +7,7 @@ import com.vvsTech.expense_tracker.response.GenericResponse;
 import com.vvsTech.expense_tracker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -30,6 +27,18 @@ public class UserController {
                                                         .message(createUserResponse.getMessage())
                                                         .statusCode(0) // 0 for success, 1 for failure
                                                         .build();
+        return genericResponse;
+    }
+
+    @GetMapping("/getUser")
+    public GenericResponse<User> getUser(@RequestParam String email){
+        User user = userService.getUser(email);
+        GenericResponse genericResponse = GenericResponse.builder()
+                .message("here's the user")
+                .code(0)
+                .statusCode(HttpStatus.OK.value())
+                .data(user)
+                .build();
         return genericResponse;
     }
 
